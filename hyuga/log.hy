@@ -1,10 +1,13 @@
 (import logging)
+(import logging.handlers [RotatingFileHandler])
 (import traceback)
 (import os.path)
 (import tempfile)
 
 (setv logger (logging.getLogger "hyuga"))
-(let [handler (logging.FileHandler :filename (os.path.join (tempfile.gettempdir) "hyuga.log"))]
+(let [handler (RotatingFileHandler :filename (os.path.join (tempfile.gettempdir) "hyuga.log")
+                                   :maxBytes 1000000
+                                   :backupCount 2)]
   (.setLevel logger logging.DEBUG)
   (.setFormatter handler (logging.Formatter "%(levelname)-9s %(asctime)s [%(name)s] %(message)s"))
   (logger.addHandler handler))

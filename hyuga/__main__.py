@@ -9,8 +9,12 @@ def main():
     parser.description = 'hyuga - Yet another hy language server'
 
     parser.add_argument(
-        '--version', action='store_true',
+        '-v', '--version', action='store_true',
         help='Print version and exit'
+    )
+    parser.add_argument(
+        '-d', '--debug', action='store_true',
+        help='Save debug logging to `hyuga.log`'
     )
 
     args = parser.parse_args()
