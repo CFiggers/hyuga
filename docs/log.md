@@ -1,0 +1,1 @@
+# `log.hy` function diagrams and documentation

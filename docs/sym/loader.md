@@ -1,0 +1,1 @@
+# `sym/loader.md` function diagrams and documentation

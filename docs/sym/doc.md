@@ -1,0 +1,1 @@
+# `sym/doc.hy` function diagrams and documentation

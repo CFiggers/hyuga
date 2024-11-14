@@ -1,0 +1,1 @@
+# `sym/dummy.hy` function diagrams and documentation
