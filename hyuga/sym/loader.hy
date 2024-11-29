@@ -12,7 +12,8 @@
 (import sys [modules])
 (import re)
 (import functools [partial])
-(import pkgutil [iter_modules get_loader])
+; (import pkgutil [iter_modules get_loader])
+(import importlib.util)
 (import types [ModuleType])
 
 (import hyuga.log [logger])
@@ -294,23 +295,27 @@
         prev-sys-path (eval-in! `sys.path)]
     (logger.debug f"load-venv! venv-path={venv-path} prev-sys-path={prev-sys-path}")
     (when (isdir venv-path)
-      (eval-in! `(import pkgutil))
+      (eval-in! `(import importlib.util))
       (eval-in! `(sys.path.insert 0 ~venv-path))
       (let [filter-fn #%(and (not (.startswith %1 "_"))
                              ;; FIXME: importing pip causes distutils AssertionError.
                              ;; @see https://github.com/pypa/setuptools/issues/3297
                              (not (= %1 "pip"))
                              (not (in f"(sysenv)\\{%1}" (->> ($GLOBAL.get-$SYMS) .keys))))
-            syms (as-> `(pkgutil.iter-modules :path [~venv-path])
+            syms (as-> `(lfor mod (os.listdir ~venv-path)
+                              :if (try (importlib.util.find_spec mod)
+                                       (except [ModuleNotFoundError] None))
+                              (importlib.util.find_spec mod))
                    it
                    (eval-in! it doc-uri)
                    (map #%(. %1 name) it)
                    (filter filter-fn it))
             items (->> syms
                        (map #%(return
-                                #(%1 (-> `(-> ~%1
-                                              pkgutil.get-loader
-                                              .load-module)
+                                #(%1 (-> `(let [spec (importlib.util.find_spec ~%1)
+                                                mod (importlib.util.module_from_spec spec)]
+                                            (spec.loader.exec-module mod)
+                                            mod)
                                          (eval-in! doc-uri)))))
                        tuple)]
         (load-sym! "(venv)" items)))))
