@@ -7,6 +7,7 @@
                           TEXT_DOCUMENT_DID_CHANGE
                           TEXT_DOCUMENT_DID_CLOSE
                           TEXT_DOCUMENT_DID_OPEN
+                          TEXT_DOCUMENT_SIGNATURE_HELP
                           CompletionOptions])
 (import pygls.server [LanguageServer])
 
@@ -60,6 +61,19 @@
     (except
       [e Exception]
       (log-error "hover" e)
+      (raise e))))
+
+#_(defn [($SERVER.feature
+        TEXT_DOCUMENT_SIGNATURE_HELP)] signature-help
+  [params]
+  "`textDocument/completion` request handler."
+  (try 
+    (let [word (cursor-word-all )]
+      (logger.info f"signature-help word={(repr word)}")
+      (if (is-not word None)
+        #_(IMPLEMENT ME)))
+    (except [e Exception]
+      (log-error "completion" e)
       (raise e))))
 
 (defn [($SERVER.feature TEXT_DOCUMENT_DEFINITION)] definition

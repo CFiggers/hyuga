@@ -8,6 +8,10 @@
                           CompletionOptions
                           CompletionParams
                           CompletionItemKind
+                          SignatureHelp
+                          SignatureInformation
+                          SignatureHelpOptions
+                          SignatureHelpParams
                           Hover
                           Range
                           Location
@@ -150,3 +154,36 @@
        (filter #%(is-not %1 None))
        distinct-locations
        list))
+
+(defn create-signature-info 
+  []
+  (SignatureInformation :label None
+                        :documentation None
+                        :parameters None
+                        :active-parameter None))
+
+(defn distinct-signature-helps 
+  []
+  (setv ret [])
+  (for [item items]
+    #_(;;FIX ME 
+       let [rng item.range
+          uri item.uri
+          not-exists? (->> ret
+                       (filter #%(and (= rng %1.range)
+                                      (= uri %1.uri)))
+                       tuple
+                       count (= 0))]
+      (when not-exists?
+        (ret.append item))))
+  ret)
+
+(defn create-signature-help-list
+  [sym/val]
+  (let [signature-info (create-signature-info )] 
+   (->> sym 
+        (map #%(let+ [{} (second %1)]
+                 (create-signature-help )))
+        (filter #%(is-not %1 None))
+        distinct-signature-helps
+        list)))
